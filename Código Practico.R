@@ -233,3 +233,68 @@ pROC::plot.roc(ROC, print.thres = "best", print.auc = TRUE, main = "Curva ROC QD
 
 #Generamos la Matriz de Confusión
 table(Base_Multi$fuma_bin, qda_pred$class, dnn = c("reales", "predichos"))
+
+
+
+
+
+
+#Redes Neuronales----
+
+# Instalar el paquete si no lo tienes: install.packages("neuralnet")
+#install.packages("neuralnet")
+##Con Datos de entrenamiento y Testeo-----
+library(neuralnet)
+
+#Estandarizamos y preparamos los datos
+datos_escalados <- as.data.frame(scale(Base_Multi[, c("Edad", "Peso", "IMC", "Nivel_de_Glucosa", "Presión_Arterial_Sistólica")]))
+datos_escalados$fuma_bin <- ifelse(Base_Multi$fuma == "No fumador", 0, 1)
+
+set.seed(42) # Fijamos semilla para que el "sorteo" de pacientes sea siempre el mismo
+sorteo <- sample(1:nrow(datos_escalados), size = 0.7 * nrow(datos_escalados))
+datos_entrenamiento <- datos_escalados[sorteo, ]   # 42 pacientes para estudiar
+datos_prueba <- datos_escalados[-sorteo, ]         # 18 pacientes ocultos para el examen final
+
+set.seed(123)
+modelo_rna_real <- neuralnet(fuma_bin ~ Edad + Peso + IMC + Nivel_de_Glucosa + Presión_Arterial_Sistólica, 
+                             data = datos_entrenamiento, 
+                             hidden = 3, 
+                             err.fct = "ce", 
+                             linear.output = FALSE)
+
+#Generar el diagrama de la Red Neuronal entrenada
+plot(modelo_rna_real, rep = "best", main = "Red Neuronal (Entrenada con el 70%)")
+
+
+##TESTEO:----
+
+#Le pedimos a la máquina que prediga sobre los 18 pacientes que no conoce
+probabilidades_prueba <- predict(modelo_rna_real, datos_prueba)
+#Clasificamos usando el umbral del 50%
+prediccion_prueba <- ifelse(probabilidades_prueba > 0.5, 1, 0)
+#Mostramos la Matriz de Confusión REAL
+table(Real = datos_prueba$fuma_bin, Predicho = prediccion_prueba)
+
+###Métricas----
+
+matriz <- table(Real = datos_prueba$fuma_bin, Predicho = prediccion_prueba)
+VN <- matriz[1, 1] # Real 0, Predicho 0
+FP <- matriz[1, 2] # Real 0, Predicho 1
+FN <- matriz[2, 1] # Real 1, Predicho 0
+VP <- matriz[2, 2] # Real 1, Predicho 1
+
+#Calculamos las métricas
+Exactitud <- (VP + VN) / sum(matriz)
+Sensibilidad <- VP / (VP + FN) # Capacidad de detectar fumadores (VP / Total de fumadores reales)
+Especificidad <- VN / (VN + FP) # Capacidad de detectar sanos (VN / Total de sanos reales)
+
+Exactitud
+Sensibilidad
+Especificidad
+
+
+#Calculamos cómo le fue a la máquina con los datos que ya conocía (Entrenamiento)
+pred_entrenamiento <- ifelse(predict(modelo_rna_real, datos_entrenamiento) > 0.5, 1, 0)
+exactitud_entrenamiento <- sum(pred_entrenamiento == datos_entrenamiento$fuma_bin) / nrow(datos_entrenamiento)
+Sobreajuste = exactitud_entrenamiento - Exactitud
+Sobreajuste #El valor 0.206 significa que el rendimiento de la Red Neuronal cayó un 20.6% al pasar de (Entrenamiento) a (Testeo).
