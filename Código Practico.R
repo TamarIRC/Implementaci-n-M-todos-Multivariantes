@@ -115,20 +115,16 @@ fviz_mca_var(acm, repel = TRUE, col.var = "contrib",
 library(factoextra)
 library(ggplot2)
 
-# 1. Calculamos la distancia (Euclidiana)
+#Calculamos la distancia (Euclidiana)
 Dist_Eucl <- get_dist(vecst, method = "euclidean")
 
-# 2. Creamos el modelo usando el criterio Complete (Vecinos lejanos)
+#Creamos el modelo usando el criterio Complete (Vecinos lejanos)
 VLEucl <- hclust(Dist_Eucl, method = "complete")
 
-# 3. Graficamos el Dendrograma con sus divisiones y línea de corte
-p <- fviz_dend(VLEucl, 
-               k = 3, 
-               cex = 0.6, 
-               lwd = 0.1,
-               show_labels = TRUE)
+#Graficamos el Dendrograma con sus divisiones y línea de corte
+p <- fviz_dend(VLEucl, k = 3, cex = 0.6, lwd = 0.1, show_labels = TRUE)
 
-# Adelgazar solo las líneas del dendrograma, no los textos
+#Adelgazar solo las líneas del dendrograma, no los textos
 for(i in seq_along(p$layers)){
   if(inherits(p$layers[[i]]$geom, "GeomSegment")){
     p$layers[[i]]$aes_params$linewidth <- 0.1
@@ -136,20 +132,47 @@ for(i in seq_along(p$layers)){
   }
 }
 
-p +
-  geom_hline(yintercept = 70, 
-             linetype = "dashed",
-             linewidth = 0.2) +
-  labs(title = "Clusters distancia vecinos Lejanos", 
-       subtitle = "Distancia Euclidiana")
+p +geom_hline(yintercept = 70, linetype = "dashed",linewidth = 0.2) + labs(title = "Clusters distancia vecinos Lejanos", subtitle = "Distancia Euclidiana")
 
 
-# 4. Cortamos el árbol para asignar los 3 clústeres a los pacientes
+#Cortamos el árbol para asignar los 3 clústeres a los pacientes
 VlEucl_Clusters <- cutree(VLEucl, 3)
 
-# 5. Generamos el mapa bidimensional de los clústeres
+#Generamos el mapa bidimensional de los clústeres
 fviz_cluster(list(data = vecst, cluster = VlEucl_Clusters), 
              show.clust.cent = TRUE, 
              main = "Clusters distancia vecinos Lejanos Euclidiana")
 
+###Método de Wald----
 
+#Creamos el modelo usando el criterio de Ward
+ward_clusters <- hclust(Dist_Eucl, method = "ward.D2")
+
+#Preparamos el Dendrograma base (separado en 2 clústeres, k = 2)
+p_ward <- fviz_dend(ward_clusters, k = 2, cex = 0.6, color_labels_by_k = TRUE)
+
+#Aplicamos tu truco para adelgazar solo las líneas del dendrograma
+for(i in seq_along(p_ward$layers)){
+  if(inherits(p_ward$layers[[i]]$geom, "GeomSegment")){
+    p_ward$layers[[i]]$aes_params$linewidth <- 0.1
+    p_ward$layers[[i]]$aes_params$size <- 0.1
+  }
+}
+
+#Agregamos las líneas de corte, títulos centrados y nombres de los ejes
+p_ward + 
+  geom_hline(yintercept = 13, linetype = "dashed", linewidth = 0.2) + 
+  labs(title = "Clusters con Ward", 
+       subtitle = "Distancia Euclidiana",
+       x = "Observaciones", 
+       y = "Altura") + 
+  theme(plot.title = element_text(hjust = 0.5), 
+        plot.subtitle = element_text(hjust = 0.5))
+
+#Cortamos el árbol para extraer los 2 grupos (¡Paso que faltaba en tu imagen!)
+Ward_Clusters <- cutree(ward_clusters, 2)
+
+#Generamos el mapa bidimensional de los clústeres
+fviz_cluster(list(data = vecst, cluster = Ward_Clusters),
+             show.clust.cent = TRUE, 
+             main = "Clusters con Método de Ward")
