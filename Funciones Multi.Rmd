@@ -68,3 +68,17 @@ Crear el modelo con manova() no te da los p-values. Para eso usas summary(modelo
   - **"Roy"**: La raíz mayor de Roy. Es el estadístico más potente, pero también el más sensible y engañoso si no se cumplen los supuestos matemáticos a la perfección.
 
 **En resumen:** manova() arma el esqueleto del cálculo y summary() le aplica la prueba estadística (Wilks, Pillai, etc.) para decirte si hay o no diferencias significativas.
+
+## Homogeneidad de matrices de varianza-covarianza (M de Box)
+
+En estadística univariada (cuando analizas una sola variable), usas pruebas como la de Levene para saber si las varianzas de dos o más grupos son iguales.
+
+En estadística **multivariada** (cuando analizas varias variables al mismo tiempo, como en un MANOVA o un Análisis Discriminante), las variables no solo tienen su propia varianza, sino que también covarían (se relacionan) entre ellas. La prueba **boxM() evalúa si estas relaciones y variaciones conjuntas son iguales en todos tus grupos**. A esto se le llama el **supuesto de homogeneidad de matrices de varianza-covarianza**.
+
+### Argumentos de la función boxM()
+
+La sintaxis de la función es muy sencilla y directa: boxM(data, grouping)
+
+- **data** (Obligatorio): Un data.frame o matriz que contenga **únicamente las variables numéricas** que deseas evaluar (en tu caso, tu variable vec con Edad, Peso, IMC, etc.).
+
+- **grouping** (Obligatorio): Un vector categórico (factor) que indica a qué grupo pertenece cada fila de tus datos (en tu caso, la variable Sexo o Estado_Nutricional). Debe tener la misma longitud que la cantidad de filas en tus datos numéricos.
