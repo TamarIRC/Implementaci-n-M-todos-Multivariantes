@@ -176,3 +176,60 @@ Ward_Clusters <- cutree(ward_clusters, 2)
 fviz_cluster(list(data = vecst, cluster = Ward_Clusters),
              show.clust.cent = TRUE, 
              main = "Clusters con Método de Ward")
+
+#ANÁLISIS DISCRIMINANTE----
+
+##Función lineal discriminante----
+###Curva ROC----
+
+#install.packages("pROC")
+library(pROC)
+
+#Creamos la variable binaria para fumar (0 = No fumador, 1 = Fuma/Fuma ocasional)
+Base_Multi$fuma_bin <- ifelse(Base_Multi$fuma == "No fumador", 0, 1)
+
+#Función Lineal Discriminante (FLD) usando el paquete MASS
+FLD <- MASS::lda(fuma_bin ~ Edad + Peso + IMC + Presión_Arterial_Sistólica, data = Base_Multi)
+
+#Curva ROC 
+ROC <- roc(Base_Multi$fuma_bin, predict(object = FLD)$posterior[, 2])
+
+#coordenadas del mejor punto de corte (Umbral, Especificidad y Sensibilidad)
+coords(ROC, "best", ret = c("threshold", "specificity", "sensitivity"))
+
+#Graficamos la Curva ROC
+plot.roc(ROC, print.thres = "best", print.auc = TRUE, main = "Curva ROC LDA",
+         auc.polygon = FALSE, max.auc.polygon = FALSE, auc.polygon.col = "#458B74",
+         col = "blue", grid = TRUE, xlab = "1-Especificidad", ylab = "Sensibilidad")
+
+#Generamos la Matriz de Confusión
+table(Base_Multi$fuma_bin, predict(object = FLD)$class, dnn = c("reales", "predichos"))
+
+##Función discriminante de razón de verosimilitud----
+
+#Redefinimos la variable binaria como factor con los nombres exactos que pide el código
+Base_Multi$fuma_bin <- factor(ifelse(Base_Multi$fuma == "No fumador", "No fumador", "Fumador"))
+
+#Ejecutamos el Análisis Discriminante Cuadrático (QDA)
+QDA <- MASS::qda(fuma_bin ~ Edad + Peso + IMC + Presión_Arterial_Sistólica, data = Base_Multi)
+
+#Generamos las predicciones del modelo
+qda_pred <- predict(QDA)
+
+#Extraemos las probabilidades de que el paciente sea "Fumador"
+p_event <- qda_pred$posterior[, "Fumador"]
+
+#Calculamos la Curva ROC
+ROC <- pROC::roc(response = Base_Multi$fuma_bin, predictor = p_event, 
+                 levels = c("No fumador", "Fumador"))
+
+#Extraemos las coordenadas óptimas
+pROC::coords(ROC, "best", ret = c("threshold", "specificity", "sensitivity"))
+
+#Graficamos la Curva ROC para el QDA
+pROC::plot.roc(ROC, print.thres = "best", print.auc = TRUE, main = "Curva ROC QDA",
+               auc.polygon = FALSE, max.auc.polygon = FALSE, auc.polygon.col = "#458B74",
+               col = "blue", grid = TRUE, xlab = "1-Especificidad", ylab = "Sensibilidad")
+
+#Generamos la Matriz de Confusión
+table(Base_Multi$fuma_bin, qda_pred$class, dnn = c("reales", "predichos"))
