@@ -111,7 +111,45 @@ acm$eig
 fviz_mca_var(acm, repel = TRUE, col.var = "contrib",
              gradient.cols = c("#d45394", "#d938e1", "#d93"))
 
+## ANALISIS DE CONGLOMERADOS----
+library(factoextra)
+library(ggplot2)
+
+# 1. Calculamos la distancia (Euclidiana)
+Dist_Eucl <- get_dist(vecst, method = "euclidean")
+
+# 2. Creamos el modelo usando el criterio Complete (Vecinos lejanos)
+VLEucl <- hclust(Dist_Eucl, method = "complete")
+
+# 3. Graficamos el Dendrograma con sus divisiones y línea de corte
+p <- fviz_dend(VLEucl, 
+               k = 3, 
+               cex = 0.6, 
+               lwd = 0.1,
+               show_labels = TRUE)
+
+# Adelgazar solo las líneas del dendrograma, no los textos
+for(i in seq_along(p$layers)){
+  if(inherits(p$layers[[i]]$geom, "GeomSegment")){
+    p$layers[[i]]$aes_params$linewidth <- 0.1
+    p$layers[[i]]$aes_params$size <- 0.1
+  }
+}
+
+p +
+  geom_hline(yintercept = 70, 
+             linetype = "dashed",
+             linewidth = 0.2) +
+  labs(title = "Clusters distancia vecinos Lejanos", 
+       subtitle = "Distancia Euclidiana")
 
 
+# 4. Cortamos el árbol para asignar los 3 clústeres a los pacientes
+VlEucl_Clusters <- cutree(VLEucl, 3)
+
+# 5. Generamos el mapa bidimensional de los clústeres
+fviz_cluster(list(data = vecst, cluster = VlEucl_Clusters), 
+             show.clust.cent = TRUE, 
+             main = "Clusters distancia vecinos Lejanos Euclidiana")
 
 
