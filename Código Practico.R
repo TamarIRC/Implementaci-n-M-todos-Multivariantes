@@ -110,3 +110,8 @@ acm$eig
 #Generamos el gráfico bidimensional de las categorías
 fviz_mca_var(acm, repel = TRUE, col.var = "contrib",
              gradient.cols = c("#d45394", "#d938e1", "#d93"))
+
+
+
+
+
