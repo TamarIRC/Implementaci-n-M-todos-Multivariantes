@@ -2,6 +2,55 @@
 
 View(Base_Multi)
 
+#Gráficos Multivariantes----
+
+#install.packages("aplpack")
+#install.packages("andrews")
+
+library(aplpack)
+library(andrews)
+
+datos_num <- Base_Multi[, 1:5]
+
+
+##CARAS DE CHERNOFF----
+#Las caras muy extrañas o diferentes serán nuestros "outliers".
+faces(datos_num, face.type = 1, main = "Caras de Chernoff: Pacientes")
+
+
+##GRÁFICOS DE ESTRELLAS (Y RAYOS)----
+
+stars(datos_num, draw.segments = TRUE, 
+      main = "Gráfico de Estrellas", 
+      labels = rownames(datos_num), 
+      key.loc = c(15, 2)) # Agrega una leyenda explicativa
+
+
+##CURVAS DE ANDREWS----
+
+# Transforma los datos de cada paciente en una "onda" (Serie de Fourier).
+# Curvas similares = pacientes similares. Curvas fuera del patrón = outliers.
+# Agregaremos la columna 6 (Sexo) y le diremos a la función que coloree (clr = 6) en base a eso.
+datos_andrews <- Base_Multi[, c(1:5, 6)] 
+andrews(datos_andrews, clr = 6, ymax = 3, main = "Curvas de Andrews (Color por Sexo)")
+
+
+#GRÁFICA DE DISPERSIÓN LADO A LADO (MATRIZ DE CORRELACIÓN)
+
+# Creamos un vector de colores: Azul para Hombres, Rojo para Mujeres
+colores <- ifelse(Base_Multi$Sexo == "HOMBRE", "blue", "red")
+
+# Usamos pairs() para cruzar todas las variables numéricas entre sí
+pairs(datos_num, 
+      pch = 21,         # Tipo de punto (círculo relleno)
+      bg = colores,     # Color de relleno
+      main = "Gráficos de Correlación: Variables Numéricas")
+
+
+
+
+
+
 #Inferencia Multivariada----
 ##Test de normalidad multivariada----
 library(MVN)
