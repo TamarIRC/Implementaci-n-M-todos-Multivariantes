@@ -47,3 +47,28 @@ boxM(vec, Base_Multi$Estado_Nutricional)
 
 
 #REDUCCIÓN DE LA DIMENSIONALIDAD----
+
+#install.packages("psych")
+library(psych)
+
+# Calculamos la matriz de correlación y aplicamos el test KMO
+KMO(cor(vec))
+
+##Componentes principales----
+
+vecst <- Base_Multi[, c("Edad", "Peso", "IMC", "Presión_Arterial_Sistólica")] 
+
+#Ejecutamos Componentes Principales y estandarizamos
+pca <- prcomp(vecst, center = TRUE, scale. = TRUE) #Se hace una Estandarización dentro
+
+pca                  # Muestra los coeficientes (cargas) de cada componente
+summary(pca)         # Resumen de la varianza explicada - Con dos variables se explica el 81,44%
+plot(pca, type = "lines") #Gráfico de sedimentación (Scree plot)
+
+##Análisis Factorial----
+
+# Ejecutamos el análisis factorial pidiendo 2 factores y sin rotación
+fa1 <- principal(vecst, nfactors = 2, rotate = "none")
+fa1
+
+fa1$communality #valor de las comunalidades
