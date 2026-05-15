@@ -1,0 +1,32 @@
+---
+title: "Estudio de Funciones"
+author: "Tetrametrics - Multi"
+date: "2026-05-15"
+output: pdf_document
+---
+
+### Pruebas de Normalidad
+
+- **mvnTest** (o mvn_test): Define qué algoritmo usar para probar la normalidad multivariada conjunta. Las opciones son[[**5**](https://www.google.com/url?sa=E&q=https%3A%2F%2Fvertexaisearch.cloud.google.com%2Fgrounding-api-redirect%2FAUZIYQFavQjMEd9gskIifrulPfgncXHDbIIVNrurIIxlwnGQedjTaZ4CguIR0hV3CGSYbXxugbk9rfipTBXVy29Pnk4tguT6mCsznOofChJYkd1D_DWiQWxoXpuXVjHNEg%3D%3D)]:
+
+  - "hz" (Por defecto): Prueba de Henze-Zirkler. Es la más recomendada porque se adapta muy bien a cualquier tamaño de muestra.
+
+  - "mardia": Prueba de Mardia. Se basa en medir si la asimetría y curtosis multivariada se desvían de lo normal. Es excelente para muestras grandes.
+
+  - "royston": Prueba de Royston. Es la versión multivariada del famoso test de Shapiro-Wilk. Útil para muestras pequeñas/medianas.
+
+  - "dh": Prueba de Doornik-Hansen.
+
+  - "energy": Prueba de E-statistic (basada en la distancia de energía).
+
+- **univariateTest** (o univariate_test): Define la prueba para comprobar la normalidad de **cada variable por separado** (univariada). Opciones:
+
+  - "AD" (Por defecto): Anderson-Darling.
+
+  - "SW": Shapiro-Wilk.
+
+  - "CVM": Cramer-von Mises.
+
+  - "Lillie": Lilliefors (adaptación de Kolmogorov-Smirnov).
+
+  - "SF": Shapiro-Francia.
