@@ -72,3 +72,41 @@ fa1 <- principal(vecst, nfactors = 2, rotate = "none")
 fa1
 
 fa1$communality #valor de las comunalidades
+
+###Rotación ortogonal----
+fa2 <- principal(vecst, nfactors = 2, rotate = "varimax")
+fa2
+
+fa2$communality
+
+###Rotación Oblicua----
+fa3 <- principal(vecst, nfactors = 2, rotate = "promax")
+fa3
+fa3$communality
+
+##ANÁLISIS DE CORRESPONDENCIA MULTIPLE----
+#install.packages("cabootcrs")
+library(cabootcrs)
+
+#Seleccionamos solo las variables categóricas de la base
+muestra_cat <- Base_Multi[, c("Sexo", "Estado_Nutricional", "fuma")]
+#Calculamos la matriz de Burt
+m_burt <- getBurt(muestra_cat)
+m_burt
+
+##Representación bidimensional----
+#install.packages("FactoMineR")
+#install.packages("factoextra")
+#install.packages("ggplot2")
+#install.packages("rlang")
+library(ggplot2)
+library(FactoMineR)
+library(factoextra) # Requerida para el gráfico fviz_mca_var
+library(rlang)
+#Ejecutamos el modelo ACM 
+acm <- MCA(muestra_cat, graph = FALSE)
+#Mostramos los valores propios (varianza explicada)
+acm$eig
+#Generamos el gráfico bidimensional de las categorías
+fviz_mca_var(acm, repel = TRUE, col.var = "contrib",
+             gradient.cols = c("#d45394", "#d938e1", "#d93"))
