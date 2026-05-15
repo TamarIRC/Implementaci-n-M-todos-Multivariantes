@@ -5,7 +5,11 @@ date: "2026-05-15"
 output: pdf_document
 ---
 
-### Pruebas de Normalidad
+# Google AI studio:
+
+<https://aistudio.google.com/prompts/1GR1JJ_Dm9x-o4ClISB5aYIxyPlRjK_pw>
+
+## Pruebas de Normalidad
 
 - **mvnTest** (o mvn_test): Define qué algoritmo usar para probar la normalidad multivariada conjunta. Las opciones son[[**5**](https://www.google.com/url?sa=E&q=https%3A%2F%2Fvertexaisearch.cloud.google.com%2Fgrounding-api-redirect%2FAUZIYQFavQjMEd9gskIifrulPfgncXHDbIIVNrurIIxlwnGQedjTaZ4CguIR0hV3CGSYbXxugbk9rfipTBXVy29Pnk4tguT6mCsznOofChJYkd1D_DWiQWxoXpuXVjHNEg%3D%3D)]:
 
@@ -30,3 +34,37 @@ output: pdf_document
   - "Lillie": Lilliefors (adaptación de Kolmogorov-Smirnov).
 
   - "SF": Shapiro-Francia.
+
+## Argumentos de la función manova()
+
+Esta función se encarga estrictamente de calcular y ajustar el modelo matemático.
+
+- **formula** (Obligatorio): Es la estructura de tu modelo. Siempre tiene la forma Y \~ X.
+
+  - Como es multivariado, la Y (las variables dependientes) deben agruparse usando **cbind(Var1, Var2, Var3)**.
+
+  - La X es tu variable categórica o de agrupación (ej. Estado_Nutricional).
+
+- **data** (Recomendado): El nombre de tu base de datos (ej. data = Base_Multi). Si no lo pones, R buscará las variables sueltas en el entorno, lo cual suele dar errores.
+
+- **subset**: Te permite hacer el MANOVA solo para una parte de los datos sin tener que crear otra base. Ejemplo: subset = (Sexo == "MUJER").
+
+- **na.action**: Le indica a R qué hacer si encuentra datos vacíos (NA). Por defecto usa na.omit (borra la fila completa que tenga algún vacío en las variables usadas).
+
+### Argumentos de la función summary() (Específicos para MANOVA)
+
+Crear el modelo con manova() no te da los p-values. Para eso usas summary(modelo), el cual recibe estos argumentos clave:
+
+- **object** (Obligatorio): El nombre donde guardaste tu modelo (en tu caso modelo_manova).
+
+- **test**: Este es el argumento más importante. Le dice a R qué estadístico multivariado utilizar para obtener el p-value. Tiene 4 opciones:
+
+  - **"Pillai"** (Es el que usa R por defecto si no escribes nada): La traza de Pillai-Bartlett. Es **el más recomendado** porque es el más robusto (el que mejor soporta si tus datos no son perfectamente normales o si hay diferencias de varianza entre grupos).
+
+  - **"Wilks"**: La lambda de Wilks. Es el más famoso y enseñado en la universidad. Funciona excelente si se cumplen todos los supuestos estrictos (normalidad y homogeneidad de covarianzas).
+
+  - **"Hotelling-Lawley"**: La traza de Hotelling-Lawley. Suele usarse cuando hay exactamente dos grupos.
+
+  - **"Roy"**: La raíz mayor de Roy. Es el estadístico más potente, pero también el más sensible y engañoso si no se cumplen los supuestos matemáticos a la perfección.
+
+**En resumen:** manova() arma el esqueleto del cálculo y summary() le aplica la prueba estadística (Wilks, Pillai, etc.) para decirte si hay o no diferencias significativas.
